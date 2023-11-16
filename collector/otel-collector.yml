@@ -9,6 +9,8 @@ processors:
   batch:
 
 exporters:
+  logging:
+    loglevel: debug
   prometheus:
     endpoint: "0.0.0.0:8889"
     const_labels:
@@ -17,6 +19,8 @@ exporters:
     endpoint: tempo:4317  # tempo container host and port
     tls:
       insecure: true
+  loki:
+    endpoint: "http://loki:3100/loki/api/v1/push"
 
 extensions:
   # responsible for responding to health check calls on behalf of the collector.
@@ -35,6 +39,9 @@ service:
       processors: [batch]
       exporters: [prometheus]
     traces:
-      receivers: [ otlp ]
-      processors: [ batch ]
-      exporters: [ otlp ]  # name here should match the exporter name for tempo which is otlp
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp]  # name here should match the exporter name for tempo which is otlp
+    logs:
+      receivers: [otlp]
+      exporters: [loki,logging]
